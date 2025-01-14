@@ -1,0 +1,10 @@
+{
+    "latex-workshop.check.duplicatedLabels.enabled": false,
+    "latex-workshop.intellisense.optionalArgsEntries.enabled": false,
+    "latex-workshop.intellisense.package.env.enabled": false,
+    "latex-workshop.kpsewhich.bibtex.enabled": false,
+    "latex-workshop.kpsewhich.class.enabled": false,
+    "latex-workshop.latex.autoBuild.cleanAndRetry.enabled": true,
+    "latex-workshop.latex.autoClean.run": "onBuilt",
+    "latex-workshop.linting.chktex.exec.path": ""
+}

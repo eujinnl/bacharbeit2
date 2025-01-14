@@ -1,0 +1,47 @@
+\section{Setup of code execution}
+Python code submitted by the user should be executed to achieve some type of objective with constraints so that the objective can be achieved by the game/level designer's intended methods. Many unintended actions can be caused if user code is not run securely such as the modification of the intended objective, falsification of high scores, crashing the backend, or in the worst case, bypassing the game and changing system files and databases.
+
+According to this blog post by \cite{codecombat_aether} and some research, most methods to prevent malicious actions and limit potential damage by untrusted code can be classified into 3 categories, which are: "client-side setup", "server-side setup", and "a mix of both".
+
+\subsection{Client-Side setup}
+By executing the code on client side, the execution environment is ran client-side. This means that all potential damage is limited to the client only. If the code is malicious, their own page is broken and not the server.
+
+Since browsers dont natively allow python code to be ran, a Python to WebAssembly interpreter is used. WebAssembly is a low level, byte code instruction set that is run directly from most browsers[22]. With a Python-to-WebAssembly interpreter, user written Python can be interpreted and compiled to byte code directly and allows for an increasingly scalable solution. However, WebAssembly is known to be unblockable and disables synchronous input. An option that was under consideration to use for the project was PyodideU, as it allows synchronous user input but it lacks documentation. Another option to run python in the browser was skulpt, but it runs on Python 2.x and not Python 3. So Pyodide, a port of CPython to WebAssembly, was used as it is easy to implement was able to be run client-side and has a large, active community. Pyodide also includes many general-purpose Python libraries, such as NumPy, Pandas, and regex, which can be used to run user code.
+
+To ensure security, the Python execution environment also needs to be restricted so that it can't load or modify other local data files. Sensitive attributes must be hidden outside the Python execution environment where the code will be ran. This means that any execution output or execution process should be only able to communicate 1 way as shown in figure \ref{fig:execution layout}, and the code should not be able to access anything beyond its scope.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/execution_layout.png}
+    \caption{Execution layout}
+    \label{fig:execution layout}
+\end{figure}
+
+The client-side setup brings many benefits and disadvantages. If the client is disconnected from the server after loading the web app, the code can still be run locally on the machine as it has serverless program execution. Since the code is also run client-side, It can help reduce server load as no code is sent over and run locally on the client's machine. The client's machine is responsible for all code execution and therefore the execution speed is also reliant on it, getting rid of latency issues and making it more interactive. However, due to it running on the client's machine, there can also be resource constraints, slow execution, and crashing in the worst case.
+
+\subsection{Server-side setup}
+A server-based setup is the more popular option for executing untrusted Python code and many such tools have been developed for it. This involves the code being sent from the client side to the server which then can be executed. Similar to methods employed in some CTFs (Capture The Flag) and other online tools, this involves the use of sandboxes. According to \cite{stephens2024sandbox}, Sandboxing is a technique for enforcing security policies on untrusted guest applications in a secure environment (i.e., “sandbox”) to eliminate risk to a host system. In this section, it's function is to securely execute untrusted application on host systems (CITE THIS). This execution happens usually in an isolated container or a seperate process with limited resources and various filters, such as system calls and network traffic etc.
+
+\subsubsection{Docker containers}
+Docker pools can also be used, such as with Microsoft Azure Cloud Shell. Security features of the operating system, e.g., seccomp/capabilities/namespaces in Linux, and Packages such as Code Jail (https://github.com/openedx/codejail) can be used to help aid the execution of untrusted code. The setup is so that the sandbox where user interaction happens is placed outside of where the main server process is. 
+
+
+% Similar to client-side setup, potential benefits and disadvantages depend on how the system is designed. If one were to use docker pools (\\cite{docker_criu}) to contain code execution, there would be a significantly increased server load, as virtual machines need to be booted up and served for each connection, as compared to executing code in a separate process in the server. However, docker pools have the advantage of limiting potential damage to only the virtual machine, while if there is a security flaw in a separate process, the entire server is also affected. This setup also allows the server to log, monitor, rollbacks, and cache results from user code.
+
+% the environment is set up in such a way that it can only access the resources and perform the actions that are allowed by the game/level designer. The sandboxed execution environment should also be able to monitor the user code and terminate it if it tries to perform any malicious actions
+
+% 
+
+
+\subsubsection{Transpilation to Javascript}
+Source-to-source compilers, also known as transcompiler, transpiler or cross-compilers is a set of tools that take the source code developed in a high-level programming language (source language), and after a transpilation process, it generates a translated source code written in another programming language (target language), that is syntactically equivalent. Puder et al.[4], says that cross-compilation itself provides only the tools to translate from one language to another, but to make it usable, it is necessary to offer a library to provide the building blocks and there currently exists no such libraries to transpile the python ecosystem. Additionally, some of the most prominent and performant Python to Javascript transpilers consistently have issues with blocking synchronous user input. This introduces lots of bugs and causes crashing the user's browser, which was a huge problem during testing and implementation as it was also hard to debug.
+
+
+
+
+
+\subsection{A mix of both}
+refer to codecombat aetherjs and stuff
+
+\subsection{Conclusion}
+Both methods have their own pros and cons, and the choice of which method to use depends on the use case and the resources available. The client-side setup is more suitable for offline functionality and reducing server load, while the server-side setup is more suitable for monitoring, logging, and security. More research will be done to figure out the best method to use for the project.

@@ -1,0 +1,142 @@
+\section{Implementation}
+Game Mechanics function as basic systems of a game that governs their respective game elements (\cite{adams2012game}). All possible basic functions(represented by algorithms and data structures) and rules in the game are part of the mechanics. The section will discuss about planned game mechanics and their implementation.
+
+\subsection{Web application}
+The game will be a web application, this is because web applications are easily accessible and can be played on any device with a web browser. The game will be built using Angular as its frontend, a popular web application frontend framework and Flask as its backend, as it is a python lightweight backend compared to its alternatives.
+
+As central storing database, MongoDB was used. This is because MongoDB is a NoSQL database, which is a good choice for storing JSON data and long strings of user code. This database's main purpose is to stores all relevant information regarding the game content and will contain possible analytics in the future. It's base entity is the "Users" entity as shown in Figure \ref{fig:users}. Upon the creation of a "Users" entity, all other relating entities with references should also be created.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.5\linewidth]{images/user_object.png}
+    \caption{Database model of the \textit{Users} entity}    
+    \label{fig:users}
+\end{figure}
+
+\subsection{Level selection}
+The game will have multiple levels, each level will have a different set of challenges. The player will have to complete each level to progress to the next. The levels will be designed to increase in difficulty as to teach the player different concepts of Python programming.
+
+In the initial level selection, the player will be presented with a list of levels. Each level will have a title, a description, and a button to start the level. The player will be able to see the buttons of the levels they cannot access disabled and greyed out until they have completed the previous level. This is kept track by the leaderboard, which will be discussed in the next section.
+
+\subsection{Leaderboard}
+According to \cite{https://doi.org/10.1111/jcal.13077}, different designs of leaderboards can maximise either performance, motivation or engagement. Lower ranking students should be anonymised to prevent demotivation, and an absolute real leaderboard which shows the points \& ranking of the students should also be in place to encourage competition. Figure \ref{fig:leaderboard} shows the final design of the leaderboard decided on, it only shows the top 3 players and the player's own ranking of each level. High scores for each level are based on arbitrary metrics, it can be time taken to complete or number of lines of code written, etc.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{images/leaderboard.png}
+    \caption{Leaderboard design}    
+    \label{fig:leaderboard}
+\end{figure}
+
+The leaderboard will store each player's data in the form of a leaderboard entity in the database as shown in Figure \ref{fig:leaderboard_object}. Upon creation of the entity, all scores are set to 0 to show that the player has not completed any level. This way, the leaderboard functions as both a way to track the player's progress and as a way to store the player's highscore.
+\begin{center} 
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.5\linewidth]{images/leaderboard_object.png}
+        \caption{Database model of the \textit{Leaderboard} entity}    
+        \label{fig:leaderboard_object}
+    \end{figure}
+\end{center}
+The backend will have an endpoint to handle the leaderboard, this endpoint will have basic CRUD functionality for the following basic use cases:
+\\\\
+% It will also handle data validation and edge cases in a following manner:
+\begin{table}[H]
+    \caption{Basic use cases for leaderboard endpoint}
+    \begin{tabular}{|p{11cm}|p{5cm}|}
+        \hline
+        Use Case & Basic path\\
+        \hline
+        Player does not have a valid matching "User" entity & Return an error\\
+        \hline
+        Player has completed a level & Create/Update the player\\
+        \hline
+        Player wants to view the leaderboard & Read the database\\
+        \hline
+        Player recompletes a level with a lower highscore & Read the leaderboard \\
+        \hline
+        Player recompletes a level with a new highscore & Read and Update the leaderboard\\
+        \hline
+    \end{tabular}
+\end{table}
+
+\subsection{Achievements}
+\begin{wrapfigure}{r}{0.5\textwidth}
+    \centering
+    \includegraphics[width=0.5\linewidth]{images/achievement_framework.png}
+    \caption{Achievement Framework (\cite{hamari2011framework})}
+\end{wrapfigure}
+According to \cite{hamari2011framework}, achievements are composed mainly of a signifier, completion logic, and a reward. The Signifier element consists of the visible parts of the achievement. The foundational logic of an achievement defines the trigger (a player-invoked action or a system-invoked event), how many times it has to be triggered,  under which conditions, and what pre-requirements exist. The Reward element defines the reward(s) a player acquires after unlocking the achievement, this can be as simple as a number going up.
+\\\\
+The signifier agreed upon for the project is in figure \ref{fig:achievements} that will be displayed on the achievements tab. The completion logic on each achievement will be different, but most achievements are planned to be achievable within the same level, hence there is no condition that is cross level and no need to store prerequirements in the database.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{images/example_achievement.png}
+    \caption{Database model of the \textit{Achievements} entity}    
+    \label{fig:achievements}
+\end{figure}
+
+For basic achievements to be stored, an achievement database schema has to be designed to relate with the player schema. The achievements will be stored in the database as an entity shown in Figure \ref{fig:achievements_object}. Upon creation of the entity, all entries of time-obtained is set to 0, this is to show that the player has not completed any achievement.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{images/achievements_object.png}
+    \caption{Database model of the \textit{Achievements} entity}    
+    \label{fig:achievements_object}
+\end{figure}
+Basic validation and verification also have to be implemented in the application layer to make sure no error occurs, the endpoint will have basic CRUD functionality for the following basic use cases:
+\begin{table}[H]
+    \caption{Basic use cases for achievements endpoint}
+    \begin{tabular}{|p{11cm}|p{5cm}|}
+        \hline
+        Use Case & Basic path\\
+        \hline
+        Player does not have a valid matching "User" entity & Return an error\\
+        \hline
+        Player has never had achievement \& triggers the completion logic of achievement & Update/Create the player to the database\\
+        \hline
+        Player already has the achievement \& retriggers the completion logic of achievement & Nothing \\
+        \hline
+        Player wants to view the achievements screen & Read the database\\
+        \hline
+    \end{tabular}
+\end{table}
+
+\subsection{Main UI and game state implementation}
+The UI plays a huge part of any game and was developed with PixiJS, A HTML5 creation engine that renders 2D graphics. There was no generic game engine used. The Main UI shows the player's code, the output of the code, and the main place where player inputs their code.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{images/main_ui.png}
+    \caption{Main UI of the game}    
+    \label{fig:main_ui}
+\end{figure}
+For the UI to be reactive to any changes by the player, a game state manager was implemented. The game state manager is a singleton class that manages the state of the game and uses dependency injection. It is responsible for accepting code from the user and then sending it to a system that runs the code, receiving updates of achievements and certain variables that it needs to keep track of, and updating the UI accordingly. The game state manager is labelled as playerCodeService and can be shown in Figure \ref{fig:game_state}.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{images/gamestate.png}
+    \caption{Class Diagram of game state mamanger}    
+    \label{fig:game_state}
+\end{figure}
+
+\subsection{Code Input}
+\begin{wrapfigure}{r}{0.5\textwidth}
+    \centering
+    \includegraphics[width=0.5\linewidth]{images/textbox.png}
+    \caption{Simple basic text box (\cite{azatbekuly2023enhancing})}
+\end{wrapfigure}
+When continue building the project, a plain textbox was initially used to input code as show in Figure \ref{fig:textbox}. 
+
+To improve on this submission of code, we can use a code editor like professional integrated development environments (IDEs) due to their many features(\cite{kapoor2024analysis}). The code editor, Monaco was decided upon compared to other editors such as Ace and CodeMirror. Monaco also needed special configurations in the bundle system, and was tough to get it to cooperate. Features that are included and being worked on are:
+\begin{itemize}
+    \item \textbf{Syntax/Semantic Highlighting}: This displays text, especially source code, in different colors and fonts according to the category of terms and rules. This feature helps the user to understand the code better.
+    \item \textbf{Code Formatting}: This is the process of organizing and structuring code according to predefined style rules. This involves automatically adjusting the indentation, spacing, and alignment of code elements when entering a new line to maintain a consistent appearance.
+    \item \textbf{Autocomplete}: Automatically suggests possible completions for partially typed words or code construct.
+    \item \textbf{Line Numbering}: Displays the line number of the code for quick referncing.
+    \item \textbf{Code Folding}: Feature that allows the user to hide and display sections of code to make it easier to navigate and read.
+    \item \textbf{Language specific features}: This needs to be improved upon to include language-specific features such as linting, definition provider, etc. Since Monaco did not come with python out of the box and custom modules had to be written to cover some basic features.
+\end{itemize}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.3\linewidth]{images/code_editor.png}
+    \caption{Code editor of IDE, a significant improvement over a basic textbox}
+\end{figure}
+Upon code submission, the next section will discuss the code execution system that will be used to run the code and check for errors.
+
+% there is a reaction of the code that ran. This reaction of running code is usually known as standard output(stdout). This has to be printed out, including all results and any errors of the code. Other than just text printing with results of code submission, storytelling can take place here that is reactive upon successful results. 
