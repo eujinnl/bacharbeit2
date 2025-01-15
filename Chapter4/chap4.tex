@@ -8,7 +8,7 @@ By executing the code on client side, the execution environment is ran client-si
 
 Since browsers dont natively allow python code to be ran, a Python to WebAssembly interpreter is used. WebAssembly is a low level, byte code instruction set that is run directly from most browsers[22]. With a Python-to-WebAssembly interpreter, user written Python can be interpreted and compiled to byte code directly and allows for an increasingly scalable solution. However, WebAssembly is known to be unblockable and disables synchronous input. An option that was under consideration to use for the project was PyodideU, as it allows synchronous user input but it lacks documentation. Another option to run python in the browser was skulpt, but it runs on Python 2.x and not Python 3. So Pyodide, a port of CPython to WebAssembly, was used as it is easy to implement was able to be run client-side and has a large, active community. Pyodide also includes many general-purpose Python libraries, such as NumPy, Pandas, and regex, which can be used to run user code.
 
-To ensure security, the Python execution environment also needs to be restricted so that it can't load or modify other local data files. Sensitive attributes must be hidden outside the Python execution environment where the code will be ran. This means that any execution output or execution process should be only able to communicate 1 way as shown in figure \ref{fig:execution layout}, and the code should not be able to access anything beyond its scope.
+To ensure security, the Python execution environment also needs to be restricted so that it can't load or modify other local data files. Sensitive attributes must be hidden outside the Python execution environment where the code will be ran. This means that any execution output should be only able to communicate 1 way as shown in figure \ref{fig:execution layout}, and the execution process should not be able to access anything beyond its scope, such as local files, backend and database.
 
 \begin{figure}[H]
     \centering
@@ -17,31 +17,52 @@ To ensure security, the Python execution environment also needs to be restricted
     \label{fig:execution layout}
 \end{figure}
 
-The client-side setup brings many benefits and disadvantages. If the client is disconnected from the server after loading the web app, the code can still be run locally on the machine as it has serverless program execution. Since the code is also run client-side, It can help reduce server load as no code is sent over and run locally on the client's machine. The client's machine is responsible for all code execution and therefore the execution speed is also reliant on it, getting rid of latency issues and making it more interactive. However, due to it running on the client's machine, there can also be resource constraints, slow execution, and crashing in the worst case.
+The client-side setup brings many benefits and disadvantages. If the client is disconnected from the server after loading the web app, the code can still be run locally on the machine as it has serverless program execution. Since the code is also run client-side, It can help reduce server load as no code is sent over and run locally on the client's machine. The client's machine is responsible for all code execution and therefore the execution speed is also reliant on it, getting rid of latency issues and making it more interactive. However, due to it running on the client's machine, there can also be resource constraints, slow execution, and crashing in the worst case. Any malicious intent will also just end up in the attacker breaking their own browser.
 
 \subsection{Server-side setup}
-A server-based setup is the more popular option for executing untrusted Python code and many such tools have been developed for it. This involves the code being sent from the client side to the server which then can be executed. Similar to methods employed in some CTFs (Capture The Flag) and other online tools, this involves the use of sandboxes. According to \cite{stephens2024sandbox}, Sandboxing is a technique for enforcing security policies on untrusted guest applications in a secure environment (i.e., “sandbox”) to eliminate risk to a host system. In this section, it's function is to securely execute untrusted application on host systems (CITE THIS). This execution happens usually in an isolated container or a seperate process with limited resources and various filters, such as system calls and network traffic etc.
+A server-based setup is the more popular option for executing untrusted Python code and many such tools have been developed for it. This involves the code being sent from the client side to the backend which then can be executed, this usually involves the use of sandboxes. According to \cite{stephens2024sandbox}, Sandboxing is a technique for enforcing security policies on untrusted guest applications in a secure environment (i.e., “sandbox”) to eliminate risk to a host system. In this section, it's function is to securely execute untrusted application on host systems (CITE THIS). This execution happens usually in an isolated container or a seperate process with limited resources and various filters, such as system calls and network traffic etc.
 
 \subsubsection{Docker containers}
-Docker pools can also be used, such as with Microsoft Azure Cloud Shell. Security features of the operating system, e.g., seccomp/capabilities/namespaces in Linux, and Packages such as Code Jail (https://github.com/openedx/codejail) can be used to help aid the execution of untrusted code. The setup is so that the sandbox where user interaction happens is placed outside of where the main server process is. 
+A Docker container is a lightweight, standalone, executable package of software that includes everything needed to run an application, not to be confused with Virtual machines (VMs). Similar to methods employed in some CTFs (Capture The Flag), and other online tools used to assess code(CITE THIS), Docker containers can also be used to sandbox and execute code isolatedly.
+
+The architecture of a server-side setup with docker containers would look like in figure \ref{fig:docker container setup}. It begins with the frontend sending code to the backend to run it through the container. The backend sends the code to the container along with any relevant information, such as the current level. This enables the container to run any pre defined logic and checks based on relevant information. The container then does validation and execution of the code. The container will be running a seperate python Flask server that is used to run the code execution and sends the standard output back to the backend, which then sends the results back to the client.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/server_execution_layout.png}
+    \caption{Docker container setup}
+    \label{fig:docker container setup}
+\end{figure}
+
+To fireup and setup the container, a DockerFile which contains instructions on how to build the Docker image is used, this usually instructs what type of dependencies to install, setting environment variables and copying files etc. The DockerFile is then built into a Docker image using the 'docker build' command. The image is then used to create a docker container using the 'docker run' command, which is a shortcute of "docker create" and "docker start". A tool that can be used to speed up service running process is docker-compose. However, using a “dockercompose.yml” file, a container (or more than one) can be run with a single command (docker-compose up), in the background (using “-d” option) and the image can be built each time before container starts again.
+
+Similar to the client-side setup, any execution output should be only able to communicate 1 way without interfering the backend database and execution processes should only happen within the docker container
 
 
-% Similar to client-side setup, potential benefits and disadvantages depend on how the system is designed. If one were to use docker pools (\\cite{docker_criu}) to contain code execution, there would be a significantly increased server load, as virtual machines need to be booted up and served for each connection, as compared to executing code in a separate process in the server. However, docker pools have the advantage of limiting potential damage to only the virtual machine, while if there is a security flaw in a separate process, the entire server is also affected. This setup also allows the server to log, monitor, rollbacks, and cache results from user code.
+
+
+\subsubsection{Virtual Machine}
+If a filesystem is needed, a VM is needed to be spun up. Online service such as Microsoft Azure and AWS EC2 can be used to rent virtual machines and be connected to the server. The VM can be used to run the code and then be destroyed after the code is executed. This is a more secure method as the VM can be isolated from the main server and can be destroyed after the code is executed. However, this method is more expensive and slower than using docker containers.
+
+Security features of the operating system such as seccomp or capabilities in Linux, and Packages such as Code Jail (CITE THIS) can be used to help aid the execution of untrusted code. The setup is so that the sandbox where user interaction happens is placed outside of where the main server process is.
+
+
+
+\subsubsection{Overciew}
+Similar to client-side setup, potential benefits and disadvantages depend on how the system is designed. If one were to use docker pools to contain code execution, there would be a significantly increased server load, as virtual machines need to be booted up and served for each connection, as compared to executing code in a separate process in the server. However, docker pools have the advantage of limiting potential damage to only the virtual machine, while if there is a security flaw in a separate process, the entire server is also affected. This setup also allows the server to log, monitor, rollbacks, and cache results from user code.
 
 % the environment is set up in such a way that it can only access the resources and perform the actions that are allowed by the game/level designer. The sandboxed execution environment should also be able to monitor the user code and terminate it if it tries to perform any malicious actions
 
-% 
-
-
-\subsubsection{Transpilation to Javascript}
-Source-to-source compilers, also known as transcompiler, transpiler or cross-compilers is a set of tools that take the source code developed in a high-level programming language (source language), and after a transpilation process, it generates a translated source code written in another programming language (target language), that is syntactically equivalent. Puder et al.[4], says that cross-compilation itself provides only the tools to translate from one language to another, but to make it usable, it is necessary to offer a library to provide the building blocks and there currently exists no such libraries to transpile the python ecosystem. Additionally, some of the most prominent and performant Python to Javascript transpilers consistently have issues with blocking synchronous user input. This introduces lots of bugs and causes crashing the user's browser, which was a huge problem during testing and implementation as it was also hard to debug.
 
 
 
 
 
-\subsection{A mix of both}
+
+
+\subsection{Client side enforcement then server side execution}
 refer to codecombat aetherjs and stuff
+
 
 \subsection{Conclusion}
 Both methods have their own pros and cons, and the choice of which method to use depends on the use case and the resources available. The client-side setup is more suitable for offline functionality and reducing server load, while the server-side setup is more suitable for monitoring, logging, and security. More research will be done to figure out the best method to use for the project.

@@ -97,7 +97,13 @@ Basic validation and verification also have to be implemented in the application
         \hline
     \end{tabular}
 \end{table}
-
+\subsection{Character Creation}
+\begin{figure}
+    \centering
+    \includegraphics{images/character_object.png}
+    \caption{Database model of the \textit{Character} entity}
+    \label{fig:character}
+\end{figure}
 \subsection{Main UI and game state implementation}
 The UI plays a huge part of any game and was developed with PixiJS, A HTML5 creation engine that renders 2D graphics. There was no generic game engine used. The Main UI shows the player's code, the output of the code, and the main place where player inputs their code.
 
@@ -137,6 +143,6 @@ To improve on this submission of code, we can use a code editor like professiona
     \includegraphics[width=0.3\linewidth]{images/code_editor.png}
     \caption{Code editor of IDE, a significant improvement over a basic textbox}
 \end{figure}
-Upon code submission, the next section will discuss the code execution system that will be used to run the code and check for errors.
+The gamestate object can also control what appears on the code editor. Upon code submission, the next section will discuss the code execution system that will be used to run the code and check for errors.
 
 % there is a reaction of the code that ran. This reaction of running code is usually known as standard output(stdout). This has to be printed out, including all results and any errors of the code. Other than just text printing with results of code submission, storytelling can take place here that is reactive upon successful results. 
