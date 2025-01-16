@@ -28,7 +28,8 @@
 \usepackage{graphicx}	
 
 \usepackage[labelfont=bf]{caption}
-					
+\usepackage{listings}
+
 \usepackage{float}
 \usepackage{wrapfig}
 %\usepackage{subfigure}
@@ -111,7 +112,20 @@
 \setlength{\footskip}{15mm}						% Abstand zur Fußzeile
 \setlength{\textheight}{235mm}					% Texthöhe
 %----------------------------------------------------------------------------------
-
+\lstdefinelanguage{JavaScript}{
+  keywords={typeof, new, true, false, catch, function, return, null, catch, switch, var, if, in, while, do, else, case, break},
+  keywordstyle=\color{blue}\bfseries,
+  ndkeywords={class, export, boolean, throw, implements, import, this},
+  ndkeywordstyle=\color{darkgray}\bfseries,
+  identifierstyle=\color{black},
+  sensitive=false,
+  comment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  commentstyle=\color{purple}\ttfamily,
+  stringstyle=\color{red}\ttfamily,
+  morestring=[b]',
+  morestring=[b]"
+}
 
 %----Glossar-----------------------------------------------------------------------
 \usepackage[toc, acronym]{glossaries} 			

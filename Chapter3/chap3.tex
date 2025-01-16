@@ -98,12 +98,16 @@ Basic validation and verification also have to be implemented in the application
     \end{tabular}
 \end{table}
 \subsection{Character Creation}
+According to \cite{anastasio26impact} and \cite{adams2013crash}, character creation is a significant part of the game as it can affect the player's experience. The character creation screen will be the first screen the player sees when they start the game. The player will be able to choose their in game name and appearance. These aspects are popular in games as they better allow the player to identify himself or herself with the game, which potentially leads to deeper engagement.
+
+For characters to be stored, a character database schema has to be designed to relate with the player schema. The character will be stored in the database as an entity shown in Figure \ref{fig:character}. The basic implementation is that any submission of a character entity done by the user will always overwrite any current existing character entity in the database.
 \begin{figure}
     \centering
     \includegraphics{images/character_object.png}
     \caption{Database model of the \textit{Character} entity}
     \label{fig:character}
 \end{figure}
+
 \subsection{Main UI and game state implementation}
 The UI plays a huge part of any game and was developed with PixiJS, A HTML5 creation engine that renders 2D graphics. There was no generic game engine used. The Main UI shows the player's code, the output of the code, and the main place where player inputs their code.
 
