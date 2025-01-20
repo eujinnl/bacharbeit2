@@ -1,54 +1,159 @@
-\section{Setup of code execution}
-Python code submitted by the user should be executed to achieve some type of objective with constraints so that the objective can be achieved by the game/level designer's intended methods. Many unintended actions can be caused if user code is not run securely such as the modification of the intended objective, falsification of high scores, crashing the backend, or in the worst case, bypassing the game and changing system files and databases.
+\section{Methods to prevents malicious Code Execution}
+After the code is submitted, it will be ran in the sandboxed or virtualised environment that was setup in the previous section. As it is sandboxed, any code that is executed should be safe and limited in damage, even if the user inputs a HTML tag like <script>, it should only affect their version of the browser. However there are more prevention methods we should take. This section will discuss the methods taken to prevent untrusted code from executing and causing harm.
 
-According to research, most methods to prevent malicious actions and limit potential damage by untrusted code can be classified into 2 categories: client-side setup and server-side setup. In this section, we will discuss the pros and cons of each method and how they can be implemented to ensure the security of the system.
+As discussed in previous subsection \ref{section:code_injection}, CIAOs taint the expected output program. The expected output program are fully evaluated values that we extract after code execution, such as a high score or tracked python variables that we can get from the execution environment's scope. If the expected output behaviour is not consistent with the expected output, the code is considered malicious. Here is a list of intended outputs from designed levels:
+\begin{itemize}
+    \item The intended output is a function that has to pass unit tests.
+    \item The intended outputs is a tracked variable that has to be of a certrain type such as string, integer, or float.
+    \item The intended output is a flag that has been hidden in the file system of the sandboxed environment.
+    \item The intended output is a class that fits all abstract purposes.
+    \item The intended output is if a keyword has been used and the result is a modified list/boolean/string.
+\end{itemize}
+Unintended outputs may, but are not limited to, the following:
+\begin{itemize}
+    \item The code is an infinite loop.
+    \item The code is a database injection.
+    \item The code is a privilege escalation.
+    \item The code is a fork bomb.
+\end{itemize}
 
-\subsection{Client-Side setup}
-By executing the code on client side with transpilation, the execution environment is ran client-side. This means that all potential damage is limited to the client only. If the code is malicious, their own page is broken and not the server.
 
-To ensure security, the Python execution environment also needs to be restricted so that it can't load or modify other local data files. Sensitive attributes must be hidden outside the Python execution environment where the code will be ran. This means that any execution output should be only able to communicate 1 way as shown in figure \ref{fig:execution layout}, and the execution process should not be able to access anything beyond its scope, such as local files, backend and database.
+% Code execution was initially implemented with a naive approach, as show in Listing \ref{lst:initial_approach}
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.8\textwidth]{images/execution_layout.png}
-    \caption{Execution layout}
-    \label{fig:execution layout}
-\end{figure}
+\subsection{Preventing database injection}
+Once user code is submitted and executed, only intended outputs from designed levels shouls be handled. This means that any communication between the execution environment and the database should be heavily controlled and monitored by the backend. Static analysis should be implemented on the code output, this means that the output is checked on the backend and should follow a predetermined ruleset with regular language. A few examples are as follows:
+\newline
+\begin{tabular}{|p{5cm}|p{11cm}|}
+    \hline
+    Intended output of player action & static analysis method\\
+    \hline
+    Player's name has to be a string & string is limited in length and cannot use any special escape characters\\
+    \hline
+    Player's avatar creation variables have to follow a color code & regex is used to check if it starts with "\#" and is only limited in length\\
+    \hline
+\end{tabular} 
+
+Anything that has to be passed or updated with the backend should always include sanitation. Parameterized queries should also be used instead of directly concatenating user input into queries, most of these can be prevented by using an Object-Document Mapping(ODM) library like PyMongo. 
+
+The ODM needs to be setup with the necessary security features such as a connection pool, this means that the database connection is reused instead of creating a new connection for every request. This is important as creating a new connection for every request can lead to a denial of service attack. As MongoDB is a NoSQL database, it is functionally different from SQL databases, it is schema-less and uses JSON-like documents. Collections schemas need to be setup to prevent injection attacks. This can be done with Basemodels from pydantic, this forces the data to be structured in python before being sent to the database. Regex methods should also be used to modify raw user input for safety. The lack of needing to write queries for data insertion is also a huge advantage as statements are already prepared with the ODM.
+
+\subsection{Preventing resource exhaustion} 
+When allowing user code to be ran, be it client or server side, it is important to prevent resource exhaustion. This can be done by setting a time limit on the code execution.
+
+\subsubsection{Client-side resource exhaustion (Pyodide Implementation)}
+Initially, code execution can be ran and limited with a timer using the signal modul in python to prevent infinite loops and resource exhaustion. This would have worked in native python as its interrupt system is based on preemptive multitasking, but Web Assembly has no support for preemptive multitasking. Pyodide is single threaded, so the signal module would be ignored anyways as pyodide will be stuck in a resource lock. Therefore, interrupting execution in Pyodide must be achieved via a different mechanism which takes some effort to set up.
+
+According to the pyodide documentation, the best way to interrupt execution is to run code execution in a dedicated web worker. To setup an interruption mechanism with a timeout, a sharedarraybuffer can be used to communicate between the main thread and the web worker. Shared array buffers are a way to share memory between the main thread and the web worker, but requires special security headers in chrome browsers. The special headers implemented are  "Cross-Origin-Opener-Policy":"same-origin" and "Cross-Origin-Embedder-Policy":"require-corp". This ensures that all the resources are loaded from the same origin and that the web worker is running in a secure context to defend against attacks.
+
+Pyodide is now ran in a web worker instead of the main thread, this has the advantage of not blocking the main thread. If a simple infinite loop like "While True: " is ran in the main thread, the browser will freeze and the user will not be able to interact with the page and has to restart the page while losing all progress. Running the code in a web worker will prevent this from happening as the main thread will still be able to interact with the page while returning an error message after the timeout if the code has not finished executing.
+
+The interruption system puts together all these concepts by setting a sharedarraybuffer as the interrupt buffer (CITE THE DOCS). Before code is executed, the interrupt buffer is set back to default. After 3 seconds, this interrupt buffer is changed to interrupt the code execution. The web worker can then check the sharedarraybuffer for the changed signal and stop execution if the buffer is changed. This method is more complex than using the signal module in python, but it is the only way to interrupt execution in Pyodide for now until Pyodide supports threading. 
+
+\subsubsection{Server-side resource exhaustion}
+As mentioned previously, python modules can be used as an approach to prevent server-side resource exhaustion in the execution environment. Various modules like signal, and subprocess are used to run the code and kill it if it exceeds the time limit.
+\begin{lstlisting}[language=Python, caption=Server-side resource exhaustion prevention with python module signal, label=lst:server_side_resource_exhaustion]
+import signal
+import sys
+
+# Define the timeout handler
+def timeout_handler(signum, frame):
+    print("Time's up! Interrupting the infinite loop.")
+    sys.exit(0)  # Terminate the script
+
+# Register the signal handler for SIGALRM
+signal.signal(signal.SIGALRM, timeout_handler)
+
+# Set an alarm for 3 seconds
+signal.alarm(3)
+
+print("The script is running. It will automatically stop in 3 seconds.")
+
+# Simulate an infinite loop
+try:
+    while True:
+        print("Running...")
+except SystemExit:
+    print("Exiting the script.")
+finally:
+    # Cancel the alarm (cleanup, though not strictly necessary here)
+    signal.alarm(0)
+\end{lstlisting}
+
+Other than using python modules, Docker containers can also be used to limit resources such as CPU and memory. This can be done by setting the --memory and --cpus flags when creating the container.
+\begin{verbatim}
+    docker run --memory="256m" --cpus="0.5" my-container
+\end{verbatim}
+This will limit the amount of memory and CPU the container can use. If a container is crashed, it will not affect the VM it is on as the container is isolated from the host machine. However, the user will not get a response if the container crashes. This lack of feedback will leave users unaware that their code execution has failed.
+
+This is why termination of the container should be handled gracefully, the container should be stopped and removed if it crashes while redirecting the user to an error page or the code execution to a different container. This can be done with Kubernetes, a container orchestration tool that can manage the lifecycle of containers. Kubernetes can be used to automatically restart containers if they crash, and redirect the user to a different container if the container crashes.
+
+\subsection{Code validation and sanitization}
+The topic of code sanitation and validation have already been briefly mentioned, but it is important to reiterate the steps taken. 
 
 
-\subsubsection{Overview}
-The client-side setup brings many benefits and disadvantages. If the client is disconnected from the server after loading the web app, the code can still be run locally on the machine as it has serverless program execution. Since the code is also run client-side, It can help reduce server load as no code is sent over and run locally on the client's machine. The client's machine is responsible for all code execution and therefore the execution speed is also reliant on it, getting rid of latency issues and making it more interactive. However, due to it running on the client's machine, there can also be resource constraints, slow execution, and crashing in the worst case. Any malicious intent will also just end up in the attacker breaking their own browser. Any high scores uploaded to the server can also be falsified due to the client-side execution and the server having no idea how the code was executed.
 
-\subsection{Server-side setup}
-A server-based setup is the more popular option for executing untrusted Python code and many such tools have been developed for it. This involves the code being sent from the client side to the backend which then can be executed, this usually involves the use of sandboxes. According to \cite{stephens2024sandbox}, Sandboxing is a technique for enforcing security policies on untrusted guest applications in a secure environment (i.e., “sandbox”) to eliminate risk to a host system. In this section, it's function is to securely execute untrusted application on host systems (CITE THIS). This execution happens usually in an isolated container or a seperate process with limited resources and various filters, such as system calls and network traffic etc.
 
-Similar to the client-side setup, any execution output should only be sent without any influence to the backend database. Any execution processes should only happen within the isolated sandbox.
 
-\subsubsection{Docker containers and Virtual Machines}
-A Docker container is a lightweight, standalone, executable package of software that includes everything needed to run an application, not to be confused with Virtual machines (VMs). Similar to methods employed in some CTFs (Capture The Flag), and other online tools used to assess code(CITE THIS), Docker containers can also be used to sandbox and execute code isolatedly. The container can either be ran on a VM or on the same server as the backend.
+% Code validation checks if the input meets a set of criteria (such as a string contains no standalone single quotation marks) and Sanitization modifies the input to ensure that it is valid (such as doubling single quotes)
 
-Virtual Machines are also used to sandbox and execute code, but they are slower to boot up and can be expensive to run. They also require more resources than docker containers and can be harder to manage. However, they can be more secure than docker containers if they are isolated from the main server. These VMs can either be hosted on the same OS the server is ran on or hosted on the cloud with popular services such as Microsoft Azure and AWS EC2 instances.
+% Code evaluation???
 
-The architecture of a server-side setup with docker containers would look like in figure \ref{fig:docker container setup}. It begins with the frontend sending code to the backend to run it through the container. The backend sends the code to the container along with any relevant information, such as the current level. This enables the container to run any pre defined logic and checks based on relevant information. The container then does validation and execution of the code. The container will be running a seperate server that can handle code execution and sends the standard output back to the backend, which then sends the results back to the client. 
 
-\begin{figure}
-    \centering
-    \includegraphics[width=0.8\textwidth]{images/server_execution_layout.png}
-    \caption{Docker container setup}
-    \label{fig:docker container setup}
-\end{figure}
 
-To fire up and setup the container, a DockerFile which contains instructions on how to build the Docker image is used, this usually instructs what type of dependencies to install, setting environment variables and copying files etc. The DockerFile is then built into a Docker image using the 'docker build' command. The image is then used to create a docker container using the 'docker run' command, which is a shortcute of "docker create" and "docker start". A tool that can be used to speed up service running process is docker-compose. However, using a “dockercompose.yml” file, a container (or more than one) can be run with a single command (docker-compose up), in the background (using “-d” option) and the image can be built each time before container starts again.
 
-To setup a virtual machine, a filesystem is needed, and a VM is needed to be spun up. Popular VM options include VirtualBox, VMWare, and Hyper-V. VMs can also run almost any operating software, the most common being some form of Linux distro such as Ubuntu. VM security is also treated very seriously and there have also been a lot more history and security research done about VMs compared to Docker containers, such as seccomp which was initially developed as a way to restrict system calls for Linux kernels. VMs also have the advantage of customization and OS configuration to install OS specific packages such as CodeJail to help aid the execution of untrusted code.
+% The evaluation controller also analyzes the code for potential threats, inefficiencies, or policy violations. The validation controller should perform linting and syntax checking. It should also implement static code checking to avoid infinite loops and dangerous built-ins such as access to the OS. After that, a test runner should try to execute code but with limited time, memory, or CPU constraints.
 
-To gurantee absolute isolation and safety, both VMs and Docker containers can be used to construct the sandbox execution environment by hosting the Docker container on a cloud hosted VM that is seperate from the main backend.
 
-\subsubsection{Overview}
-Similar to client-side setup, potential benefits and disadvantages depend on how the system is designed. If one were to use docker containers to contain code execution, there would be a significantly increased server load, as virtual machines need to be booted up and served for each connection, as compared to executing code in a separate process in the server. However, docker containers have the advantage of limiting potential damage to only the OS it is hosted on. This setup also allows the server to log, monitor, rollbacks, and cache results from user code.
 
-Another potential addon to the server-side setup is to by applying client-side code enforcement before the code is sent to the backend. In this approach, the client-side environment is used to enforce initial constraints and perform preliminary checks on the user-submitted code. This can include syntax validation, basic security checks, and ensuring that the code adheres to predefined rules. By doing this on the client side, we can quickly filter out obviously malicious or incorrect code before it reaches the server and reject it before it is sent, reducing the server load and improving responsiveness.
+% talk about eval and exec, how they are dangerous but unavoidable
+% There are various problems with this, such as infinite loops
 
-\subsection{Conclusion}
-Both methods have their own pros and cons, and the choice of which method to use depends on the use case and the resources available. The client-side setup is more suitable for offline functionality and reducing server load, while the server-side setup is more suitable for monitoring, logging, and security.
 
+% talk about python being duck dynamic typed
+
+% The database also needs to have a privilege separation, this means that the database user that the application uses should only have the necessary permissions to perform the necessary operations.
+
+
+
+
+
+% Here is a list of intended outputs from designed levels:
+% \begin{itemize}
+%     \item The intended output is a function that has to pass unit tests.
+%     \item The intended outputs is a tracked variable that has to be of a certrain type such as string, integer, or float.
+%     \item The intended output is a flag that has been hidden in the file system of the sandboxed environment.
+%     \item The intended output is a class that fits all abstract purposes.
+%     \item The intended output is if a keyword has been used and the result is a modified list/boolean/string.
+% \end{itemize}
+
+
+% \subsection{Code Evaluation, Validation, and Sanitization}
+% Code validation should be run before the code is executed, the code shall be parsed as a string to an evaluation controller to ensure the submitted code complies with the application's security policies and usage constraints. The evaluation controller also analyzes the code for potential threats, inefficiencies, or policy violations.
+% The validation controller should perform linting and syntax checking. It should also implement static code checking to avoid infinite loops and dangerous built-ins such as access to the OS. After that, a test runner should try to execute code but with limited time, memory, or CPU constraints.
+
+
+
+
+
+
+% \subsection{Server-side execution}
+% Statically typed 
+
+% \subsection{Client-side execution (Pyodide Execution)}
+% This was the method that was explored with the most to figure out if there were any potential security risks. The Pyodide execution environment was already sandboxed out of the box. So even if there were any malicious code trying to destroy the environment, it would only affect the user's browser. Furthermore, pyodide
+
+% tmp home dev proc lib posix
+
+% There are also other attempts to sandbox Python code within the same execution environments. There are also tools that try to remedy this problem, RestrictedPython is a tool that defines a subset of Python language to provide input into our python environment. It gives strict bytecode access to the user code and restricts what is allowed to do but requires intimate knowledge of how Python works. 
+
+
+% \subsection{Namespace Restrictions}
+% If for example, dictionaries should not be used, the keywords and methods such as {} or dict.fromkeys() can be restricted as the user’s code is run in a local namespace. This can be particularly useful in preventing “import” and removing access to parts of the runtime. 
+% However, this isn’t exactly foolproof as Python doesn't have strict private members like other languages such as Java or C++, allows one to walk up a class tree or access private variables such as “\_\_builtins\_\_” \cite{stackexchange_untrusted_python}. However, there is a promising project called “Restricted Python” \cite{restricted_python} currently under development that might prevent these cases in the future. 
+
+
+
+
+
+% \section{Caution against code execution}
+% After the code is submitted, it will be ran in the sandboxed or virtualised environment that was setup in the previous section. As it is sandboxed, any code that is executed

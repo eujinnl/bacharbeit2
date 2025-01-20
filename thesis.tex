@@ -31,8 +31,9 @@
 \usepackage{listings}
 
 \usepackage{float}
-\usepackage{wrapfig}
 %\usepackage{subfigure}
+\usepackage{wrapfig}
+
 
 \usepackage{geometry}						% Für newgeometry in Titelseite
 \geometry{a4paper,left=30mm,right=20mm}
@@ -48,7 +49,7 @@
 			]{hyperref}
 			
 \usepackage{natbib}%numbers 				
-
+\usepackage{adjustbox}
 \usepackage{pdfpages}
 
 \usepackage{color}
@@ -112,6 +113,8 @@
 \setlength{\footskip}{15mm}						% Abstand zur Fußzeile
 \setlength{\textheight}{235mm}					% Texthöhe
 %----------------------------------------------------------------------------------
+\lstset{showstringspaces=false}
+
 \lstdefinelanguage{JavaScript}{
   keywords={typeof, new, true, false, catch, function, return, null, catch, switch, var, if, in, while, do, else, case, break},
   keywordstyle=\color{blue}\bfseries,

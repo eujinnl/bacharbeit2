@@ -3,28 +3,38 @@
 This section discusses about game development of educational games, gamification and other tools focused on teaching programming skills.
 %  but with different game elements and didactic approaches.
 
-\subsection{Gamification and Game-Based Learning}
-\cite{10.1145/2181037.2181040} defines gamification as "the use of game design elements in non-game contexts", this increases the engagement of the learner   (CITE HERE). Figure 1 classifies gamification and differentiates it to similar areas. There is a large number of game mechanics that can be added in terms of gamification (Brull and Finlayson, 2016; S. Kim et al., 2018):
-\begin{itemize}
-    \item Points
-    \item Badges
-    \item levels
-    \item Leaderboards
-    \item Progression Bars
-    \item Certificates
-    \item Story
-    \item Avatar (selection and customization)
-\end{itemize}
+% \subsection{Gamification and Game-Based Learning}
+% \cite{10.1145/2181037.2181040} defines gamification as "the use of game design elements in non-game contexts", this increases the engagement of the learner   (CITE HERE). Figure 1 classifies gamification and differentiates it to similar areas. There is a large number of game mechanics that can be added in terms of gamification (Brull and Finlayson, 2016; S. Kim et al., 2018):
 
-Examples of gamification can be seen in apps like Kahoot! and Duolingo. They are platforms in which lessons and quizes are given out, these are traditional questions that are usually given out in a learning or exam setting, but with now extra unlockables and collectibles. 
+
+% Examples of gamification can be seen in apps like Kahoot! and Duolingo. They are platforms in which lessons and quizes are given out, these are traditional questions that are usually given out in a learning or exam setting, but with now extra unlockables and collectibles. 
+
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=0.5\linewidth]{images/dimensions.png}
+%     \caption{The dimensions of gaming/playing and whole/parts (After \cite{10.1145/2181037.2181040})}
+% \end{figure}
+
+% In order to distinguish gamification from game-based learning, gamification just introduces gamelike elements (elements or mechanics) into a non-gaming setting. Game-based learning, however, is a type of game play that has defined learning outcomes (Becker, 2021). With a specific learning goal in mind, a learning task is redesigned to make learning more interesting and more effective. This involves the use of serious games and elements of gamification in the learning process, seen as a tool of game-based learning. 
+
+\subsection{Game-based learning}
+Game-based learning (GBL) is a type of game play that has defined learning outcomes (Becker, 2021). With a specific learning goal in mind, a learning task is redesigned to make learning more interesting and more effective. This involves the use of serious games and elements of gamification in the learning process, seen as a tool of game-based learning. According to \cite{plass2015foundations} in figure \ref{fig:model_GBL}, the game design features are at the center of the learning experience and should be paid close attention to designing and intergrating them. 
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.5\linewidth]{images/dimensions.png}
-    \caption{The dimensions of gaming/playing and whole/parts (After \cite{10.1145/2181037.2181040})}
+    \includegraphics[width=0.5\linewidth]{images/model_gbl.png}
+    \caption{Model of Game-based learning}
+    \label{fig:model_GBL}
 \end{figure}
-
-In order to distinguish gamification from game-based learning, gamification just introduces gamelike elements (elements or mechanics) into a non-gaming setting. Game-based learning, however, is a type of game play that has defined learning outcomes (Becker, 2021). With a specific learning goal in mind, a learning task is redesigned to make learning more interesting and more effective. This involves the use of serious games and elements of gamification in the learning process, seen as a tool of game-based learning. 
+The fundamentals and building blocks of game design that is focused on this thesis are the game mechanics and incentive systems. Other building blocks such as musical score, narrative design and such are not discussed and out of scope. The following are the functional requirements of the game developed that will be discussed in the project:
+\begin{itemize}
+    \item Points
+    \item Badges (Achievements)
+    \item Levels (Progression)
+    \item Leaderboards
+    \item Player interface (Controller)
+    \item Avatar (selection and customization)
+\end{itemize}
 
 \subsection{Game Frameworks}
 To date, educational game development teams have utilized a diverse mix of game design and instructional design methodologies to help realize their designs, but often without a unifying framework to bring these diverse perspectives together. An iterative approach to designing educational games is Winn's (2008) Game Design Play and Experience Framework, which is a modificaiton of the Mechanics, Dynamics, and Aesthetics (MDA) Framework as it does not address aspects outside of Entertainment. According to Figure 1.2, the designer of an educational game would usually have to take into account 4 different layers[17]. Learning, Storytelling, gameplay and user experience. This thesis focuses on the 3rd and 4th layer of the framework, gameplay and user experience.
@@ -36,8 +46,8 @@ To date, educational game development teams have utilized a diverse mix of game 
 \end{figure}
 
 
-The gameplay layer most closely resembles another framework. The gameplay layer defines what the player does in the game and is broken down into mechanics, dynamics and effects. The mechanics are the rules that define the operation of the game world, what the player can do, the challenges the player will face, and the player’s goals. The dynamics are the resulting behavior when the rules are instantiated over time with the influence of the
-player’s interactions. The resulting experiences, or emotions derived in the player, are the affects. This is the rules and operations of the game world and the background processes of our game. For the purposes of the project, our focus on executing code is the core mechanic and dynamic of the game.
+The gameplay layer most closely resembles another framework. The gameplay layer defines what the player does in the game and is broken down into mechanics, dynamics and effects. The mechanics are the rules that define the operation of the game world, what the player can do, the challenges the player will face, and the player's goals. The dynamics are the resulting behavior when the rules are instantiated over time with the influence of the
+player's interactions. The resulting experiences, or emotions derived in the player, are the affects. This is the rules and operations of the game world and the background processes of our game. For the purposes of the project, our focus on executing code is the core mechanic and dynamic of the game.
 
 The user experience layer is designed so that user interfaces are made to access the entertaining gameplay (Saltzman, 2000, p. 256) and to create a vehicle to realize the desired serious outcomes. Good user interfaces are said to be transparent, that is, the player does not have to focus their attention on how to play the game (i.e., what button to press) but rather on the gameplay, storytelling, and learning experience.
 
@@ -60,6 +70,7 @@ Minecraft Education is a game-based platform that inspires creative, inclusive l
     \centering
     \includegraphics[width=0.5\linewidth]{images/blocks1_2.png}
     \caption{Minecraft Education: Code Builder}
+    \label{fig:minecraft_code_builder}
 \end{figure}
 
 The key feature about Minecraft is its' sandbox and giving the user infinite choices and freedom to create whatever is desired.
@@ -75,21 +86,196 @@ Launched in October 2013, CodeCombat is an open-browser-based game where players
 Ultimately, I think CodeCombat is a very well made game that should be the project's standard. It's adaptive to multiple programming languages and has a very clean looking UI.
 
 \subsubsection{Duolingo}
-Although Duolingo is not a game-based learning tool, many of its gamification elements should be observed and implemented in the project as they enhance user engagement and motivation (\cite{mekler2017towards}). Based on \cite{toda2019analysing}, Duolingo incorporates several key gamification elements:
+Although Duolingo is not a game-based learning tool, many of its game elements should be observed and implemented in the project as they enhance user engagement and motivation (\cite{mekler2017towards}). Based on \cite{toda2019analysing}, Duolingo incorporates several key game elements that can be learnt from and adapted to the project:
 \begin{itemize}
     \item \textbf{leaderboard}: Users can see how they rank compared to others based on their performance and progress, fostering \textbf{competition} and motivation.
     \item \textbf{Achievements}: Various achievements can be unlocked by completing specific tasks or reaching milestones, providing a sense of accomplishment (\textbf{Acknowledgement}).
     \item \textbf{Levels}: Users \textbf{progress} through different levels as they complete lessons, which helps to structure the learning process and provide clear goals.
     \item \textbf{Avatar Customization}: Users can customize their avatars (\textbf{Imposed Choice}), adding a personal touch and increasing engagement.
 \end{itemize}
-
-These elements can be learnt from and adapted to the project.
 \begin{figure}[H]
-    \begin{tabular}{cc}
-    \subfloat[Avatar customization]{\includegraphics[width=2in]{images/duo_avatar.png}} &
-    \subfloat[Level selector]{\includegraphics[width=2in]{images/duo_levels.jpg}} \\
-    \subfloat[leaderboard]{\includegraphics[width=2in]{images/duo_leaderboard.png}}&
-    \subfloat[Achievements]{\includegraphics[width=2in]{images/duo_achievements.png}}\\
-    \end{tabular}
-    \caption{Duolingo gamification elements}
+    \centering
+    \adjustbox{max width=\textwidth}{
+        \begin{tabular}{cccc}
+        \subfloat[Avatar customization]{\includegraphics[width=2in]{images/duo_avatar.png}} &
+        \subfloat[Level selector]{\includegraphics[width=2in]{images/duo_levels.jpg}} &
+        \subfloat[Leaderboard]{\includegraphics[width=2in]{images/duo_leaderboard.png}} &
+        \subfloat[Achievements]{\includegraphics[width=2in]{images/duo_achievements.png}} \\
+        \end{tabular}
+    }
+    \caption{Duolingo game elements.}
 \end{figure}
+
+
+\subsection{Compilers and Interpreters}
+A compiler is a program that translates statements in one language into equivalent statements in another language. Typically, compilers translate programs writtennin a high-level language into programs that perform that same task in machine language. These machine-Ianguage programs can then be run on the computer. \cite{Grillmeyer1998}
+
+An interpreter interprets statements in a language so that the actions of the statements can be simulated on a computer. An interpreter does not produce results that can be performed on another machine, so cross-interpreters do not exist, not to be confused with cross compilers as discussed in the next section. Interpreters are easier to produce than compilers; however, interpreted code runs slower than compiled code. \cite{Grillmeyer1998}
+
+Both compilers and interpreters are programs used to translate source code from a high-level programming language into a low-level programming language (like machine code). The difference is compilers translate the entire code program before executing it, and interpreters translate the code program line-by-line as it's being executed.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\textwidth]{images/inter_v_comp.png}
+    \caption{Main difference between a compiler and interpreter}
+    \label{fig:comp_v_inter}
+\end{figure}
+
+
+\subsection{Background on Code transpilation} \label{section:transpilation_background}
+Source-to-source compilers, also known as transcompiler, transpiler or cross-compilers is a set of tools that take the source code developed in a high-level programming language (source language), and after a transpilation process, it generates a translated source code written in another programming language (target language), that is syntactically and approximately equivalent, the original source code can now be compiled and ran in the target language.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\textwidth]{images/transpiler_working.png}
+    \caption{Principles of working for a transpiler}
+    \label{fig:transpiler_working}
+\end{figure}
+
+\begin{lstlisting}[language=Python, caption=Example of python user code]
+# Python Program to find the area of triangle
+
+a = 5
+b = 6
+c = 7
+
+# calculate the semi-perimeter
+s = (a + b + c) / 2
+
+# calculate the area
+area = (s*(s-a)*(s-b)*(s-c)) ** 0.5
+print('The area of the triangle is %0.2f' %area)
+
+\end{lstlisting}
+
+\begin{lstlisting}[language=JavaScript, caption=Example of a transpiled code]
+// JavaScript Program to find the area of triangle
+
+let a = 5;
+let b = 6;
+let c = 7;
+
+// calculate the semi-perimeter
+let s = (a + b + c) / 2;
+
+// calculate the area
+let area = Math.sqrt(s * (s - a) * (s - b) * (s - c));
+console.log(`The area of the triangle is ${area.toFixed(2)}`);
+\end{lstlisting}
+
+\subsection{Code injection attacks}  \label{section:code_injection}
+Code injection is the exploitation of a computer bug that is caused by processing invalid data. Injection is used by an attacker to introduce (or "inject") code into a vulnerable computer program and change the course of execution. The result of successful code injection can be disastrous, for example, an attacker can execute arbitrary code and gain access to the system. CIAOs occur when at least one symbol injected into an output program is used outside of a value. That is, the symbol is used in a context where it is interpreted as a command or a part of a command. Examples of code-injection attacks on outputs (CIAOs) are LDAP-injection, HTML/script-injection (XSS), shell-injection attacks, SQL-injections etc. \cite{ray2012defining}. This subsection will talk about common sanitation methods to prevent code injection attacks.
+
+\begin{table}[H]
+    \label{table:sql_injection}
+    \centering
+    \caption{Example of an SQL Injection (CIAOs)}
+    \begin{tabular}{|l|}
+        \hline
+        \texttt{`SELECT * FROM users WHERE name = "` + name + `"`;} \\
+        \hline
+        \textbf{Malicious Input:} \texttt{"; DROP TABLE users --} \\
+        \hline
+        \textbf{Resulting Query:} \texttt{`SELECT * FROM users WHERE name = ""; DROP TABLE users --`} \\
+        \hline
+        \textbf{Impact:} Entire database is dropped and deleted! \\
+        \hline
+    \end{tabular}
+\end{table}
+
+\subsection{Prevention Methods on Database attacks}
+As shown in Table \ref{table:sql_injection}, the malicious input can be prevented by using static analysis. Static analysis is a method of debugging by examining code without executing the program. In the case of SQL, the input can be sanitized by paying attention to code symbols that are defined in the user input such as DROP, and special symbols like ". This sanitization technique can be specified using regular expressions (regex) like ([ˆ"\\]|(\")|(\\))* to prevent any special and escaped characters. Different languages come with different types of rules, for example in HTML wou would look for opening and closing tags. 
+
+Prepared statements are also another method to prevent code injection attacks. Prepared statements are a feature used to execute the same (or similar) SQL statements repeatedly with high efficiency. Prepared statements work by sending the SQL statement to the database first, where it is parsed, compiled, and stored. This allows the database to execute the statement more efficiently because it does not need to repeat the parsing and compilation steps each time the statement is executed.
+
+\begin{lstlisting}[language=PHP, caption={Prepared statement example in PHP\cite{10.1145/3322645.3322704}}]
+    $sql = "SELECT * FROM admin_tb WHERE username = ? AND password = ?";
+    $exist = false;
+    
+    if ($stmt = $mysqli->prepare($sql)) {
+        $stmt->bind_param("ss", $_GET['user'], $_GET['pass']);
+    
+        $stmt->execute();
+        $stmt->store_result();
+    
+        if (($stmt->num_rows) > 0) {
+            $exist = true;
+        }
+    }
+    \end{lstlisting}
+    
+\subsection{Webworkers}
+Web workers are a simple means for web content to run scripts in background threads. The worker thread can perform tasks without interfering with the user interface. Once created, a worker can send messages to the JavaScript code that created it by posting messages to an event handler specified by that code (and vice versa). Modern web applications often use web workers to perform complex tasks such as parsing large JSON files, image processing, or other CPU-intensive tasks. 
+
+To investigate webworkers, we need to know why they exist. JavaScript, which is limited to a single-threaded workflow, uses a stack, callback queue, and something called the Event loop. The main purpose with the event loop is to make sure the requested commands are being executed in the correct order. When a function is invoked, it is added to the queue. The event loop is always checking if the stack is empty, if it is, the event loop will take the first function in the queue and add it to the stack to execute such as calls to web APIS and then wait for a callback as shown in figure \ref{fig:event loop}. This is how JavaScript can handle multiple tasks at once. This usually works well for most tasks, but when a task takes too long to execute within the browser environment, the stack will be blocked for a long time and the browser freezes. Browsers also usually work in a single-threaded environment, so there is no way for multitasking or parallel execution. Web workers are a way to solve this problem.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{images/event loops.png}
+    \caption{Event loop in JavaScript (\cite{djarv2020performance})}
+    \label{fig:event loop}
+\end{figure}
+
+The primary steps to use a Web Worker in a web application are as follows and an example in Listing \ref{lst:webworker_example}:
+
+\begin{enumerate}
+    \item \textbf{Create a Worker:} Initialize a new worker by providing the path to a JavaScript file containing the worker's logic.
+    \item \textbf{Post Messages:} Send data to the worker using the \texttt{postMessage()} method.
+    \item \textbf{Listen for Messages:} Use the \texttt{onmessage} event handler to receive messages from the worker.
+    \item \textbf{Terminate the Worker:} When the worker is no longer needed, terminate it using the \texttt{terminate()} method to free up resources.
+\end{enumerate}
+% Below is an example of how to use a dedicated web worker to perform a computationally intensive task:
+% \paragraph{Main Thread:}
+\begin{lstlisting}[language=JavaScript, caption=Main thread script, label=lst:webworker_example]
+// Create a new Worker
+const worker = new Worker('worker.js');
+
+// Send data to the worker
+worker.postMessage({ task: 'compute', data: [1, 2, 3, 4, 5] });
+
+// Listen for messages from the worker
+worker.onmessage = function(event) {
+    console.log('Result from worker:', event.data);
+};
+
+// Terminate the worker when done
+worker.terminate();
+\end{lstlisting}
+
+\paragraph{Worker Script (\texttt{worker.js}):}
+\begin{lstlisting}[language=JavaScript, caption=Worker script]
+// Listen for messages from the main thread
+self.onmessage = function(event) {
+    const { task, data } = event.data;
+
+    if (task === 'compute') {
+        // Perform computation
+        const result = data.reduce((sum, num) => sum + num, 0);
+        
+        // Send the result back to the main thread
+        self.postMessage(result);
+    }
+};
+\end{lstlisting}
+% According to mdn web docs (CITE THIS),There are three main types of Web Workers:
+% \begin{itemize}
+%     \item \textbf{Dedicated Web Workers:} These are workers that are tied to a single script and can only communicate with the script that created them. They are suitable for tasks that do not need to share data or resources with multiple scripts.
+%     \item \textbf{Shared Web Workers:} These workers can be accessed by multiple scripts, even if they are running in different windows, tabs, or iframes, provided they are in the same origin. Shared workers enable better resource sharing and coordination across different parts of an application and scripts must communicate via an active port.
+%     \item \textbf{Service Workers:} These are a special type of workers designed for managing network requests and caching resources. They act as proxy servers that sit between web apps, browsers and the network. They are often used to create offline-first web applications and handle push notifications.
+% \end{itemize}
+
+
+% \subsubsection{Benefits of Web Workers}
+% \begin{itemize}
+%     \item \textbf{Improved Performance:} By offloading heavy computations to a separate thread, the main thread remains responsive, enhancing the user experience.
+%     \item \textbf{Asynchronous Processing:} Workers enable non-blocking operations, which is crucial for web applications that require real-time interactions.
+%     \item \textbf{Scalability:} Shared workers allow different parts of an application to share resources efficiently.
+% \end{itemize}
+
+% \subsubsection{Limitations of Web Workers}
+% \begin{itemize}
+%     \item \textbf{No DOM Access:} Workers cannot directly interact with the DOM, requiring communication with the main thread for UI updates.
+%     \item \textbf{Resource Overhead:} Each worker consumes system resources, so creating too many workers can negatively impact performance.
+%     \item \textbf{Same-Origin Policy:} Workers are subject to the same-origin policy, which can restrict their use in certain scenarios.
+% \end{itemize}
+

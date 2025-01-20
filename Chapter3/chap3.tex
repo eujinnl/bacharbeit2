@@ -15,7 +15,7 @@ As central storing database, MongoDB was used. This is because MongoDB is a NoSQ
 \subsection{Level selection}
 The game will have multiple levels, each level will have a different set of challenges. The player will have to complete each level to progress to the next. The levels will be designed to increase in difficulty as to teach the player different concepts of Python programming.
 
-In the initial level selection, the player will be presented with a list of levels. Each level will have a title, a description, and a button to start the level. The player will be able to see the buttons of the levels they cannot access disabled and greyed out until they have completed the previous level. This is kept track by the leaderboard, which will be discussed in the next section.
+In the initial level selection, the player will be presented with a list of levels. Each level will have a title, a description, and a button to start the level. The player will be able to see the buttons of the levels they cannot access disabled and greyed out until they have completed the previous level. This progression of the player is kept track by the leaderboard, which will be discussed in the next section.
 
 \subsection{Leaderboard}
 According to \cite{https://doi.org/10.1111/jcal.13077}, different designs of leaderboards can maximise either performance, motivation or engagement. Lower ranking students should be anonymised to prevent demotivation, and an absolute real leaderboard which shows the points \& ranking of the students should also be in place to encourage competition. Figure \ref{fig:leaderboard} shows the final design of the leaderboard decided on, it only shows the top 3 players and the player's own ranking of each level. High scores for each level are based on arbitrary metrics, it can be time taken to complete or number of lines of code written, etc.
@@ -57,51 +57,68 @@ The backend will have an endpoint to handle the leaderboard, this endpoint will 
     \end{tabular}
 \end{table}
 
+
 \subsection{Achievements}
-\begin{wrapfigure}{r}{0.5\textwidth}
+
+According to \cite{hamari2011framework}, achievements are composed mainly of a signifier, completion logic, and a reward. The Signifier element consists of the visible parts of the achievement. The foundational logic of an achievement defines the trigger (a player-invoked action or a system-invoked event), how many times it has to be triggered, under which conditions, and what pre-requirements exist. The Reward element defines the reward(s) a player acquires after unlocking the achievement; this can be as simple as a number going up. test2
+
+\begin{wrapfigure}[16]{r}{0.5\textwidth}
     \centering
     \includegraphics[width=0.5\linewidth]{images/achievement_framework.png}
-    \caption{Achievement Framework (\cite{hamari2011framework})}
+    \caption{Achievement Framework from \cite{hamari2011framework}}
+    \label{fig:achievement_framework}
 \end{wrapfigure}
-According to \cite{hamari2011framework}, achievements are composed mainly of a signifier, completion logic, and a reward. The Signifier element consists of the visible parts of the achievement. The foundational logic of an achievement defines the trigger (a player-invoked action or a system-invoked event), how many times it has to be triggered,  under which conditions, and what pre-requirements exist. The Reward element defines the reward(s) a player acquires after unlocking the achievement, this can be as simple as a number going up.
-\\\\
-The signifier agreed upon for the project is in figure \ref{fig:achievements} that will be displayed on the achievements tab. The completion logic on each achievement will be different, but most achievements are planned to be achievable within the same level, hence there is no condition that is cross level and no need to store prerequirements in the database.
+
+The signifier agreed upon for the project is shown in Figure~\ref{fig:achievements} and will be displayed on the achievements tab. The completion logic for each achievement will differ, but most achievements are planned to be achievable within the same level. Hence, there is no condition that spans across levels, and there is no need to store pre-requirements in the database.
+
 \begin{figure}[H]
-    \centering
+    \captionsetup{justification=raggedright,singlelinecheck=false}
     \includegraphics[width=0.5\linewidth]{images/example_achievement.png}
-    \caption{Database model of the \textit{Achievements} entity}    
+    \caption{Example of an achievement}
     \label{fig:achievements}
 \end{figure}
+% \begin{wrapfigure}{l}{0.5\textwidth}
+%     \centering
+%     \includegraphics[width=0.5\linewidth]{images/example_achievement.png}
+%     \caption{Example of an achievement}
+%     \label{fig:achievements}
+% \end{wrapfigure}
 
-For basic achievements to be stored, an achievement database schema has to be designed to relate with the player schema. The achievements will be stored in the database as an entity shown in Figure \ref{fig:achievements_object}. Upon creation of the entity, all entries of time-obtained is set to 0, this is to show that the player has not completed any achievement.
+For basic achievements to be stored, an achievement database schema has to be designed to relate to the player schema. The achievements will be stored in the database as an entity, as shown in Figure~\ref{fig:achievements_object}. Upon creation of the entity, all entries of `time-obtained` are set to 0, indicating that the player has not completed any achievements.
+\\\\
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\linewidth]{images/achievements_object.png}
-    \caption{Database model of the \textit{Achievements} entity}    
+    \caption{Database model of the \textit{Achievements} entity}
     \label{fig:achievements_object}
 \end{figure}
-Basic validation and verification also have to be implemented in the application layer to make sure no error occurs, the endpoint will have basic CRUD functionality for the following basic use cases:
+
+Basic validation and verification also have to be implemented in the application layer to ensure no errors occur. The endpoint will have basic CRUD functionality for the following use cases:
+
 \begin{table}[H]
+    \centering
     \caption{Basic use cases for achievements endpoint}
+    \label{table:achievements_usecases}
     \begin{tabular}{|p{11cm}|p{5cm}|}
         \hline
-        Use Case & Basic path\\
+        \textbf{Use Case} & \textbf{Basic Path} \\
         \hline
-        Player does not have a valid matching "User" entity & Return an error\\
+        Player does not have a valid matching "User" entity & Return an error \\
         \hline
-        Player has never had achievement \& triggers the completion logic of achievement & Update/Create the player to the database\\
+        Player has never had an achievement and triggers the completion logic of the achievement & Update/Create the player in the database \\
         \hline
-        Player already has the achievement \& retriggers the completion logic of achievement & Nothing \\
+        Player already has the achievement and retriggers the completion logic of the achievement & Do nothing \\
         \hline
-        Player wants to view the achievements screen & Read the database\\
+        Player wants to view the achievements screen & Read from the database \\
         \hline
     \end{tabular}
 \end{table}
+
 \subsection{Character Creation}
 According to \cite{anastasio26impact} and \cite{adams2013crash}, character creation is a significant part of the game as it can affect the player's experience. The character creation screen will be the first screen the player sees when they start the game. The player will be able to choose their in game name and appearance. These aspects are popular in games as they better allow the player to identify himself or herself with the game, which potentially leads to deeper engagement.
 
 For characters to be stored, a character database schema has to be designed to relate with the player schema. The character will be stored in the database as an entity shown in Figure \ref{fig:character}. The basic implementation is that any submission of a character entity done by the user will always overwrite any current existing character entity in the database.
-\begin{figure}
+\begin{figure}[H]
     \centering
     \includegraphics{images/character_object.png}
     \caption{Database model of the \textit{Character} entity}
@@ -125,13 +142,16 @@ For the UI to be reactive to any changes by the player, a game state manager was
     \label{fig:game_state}
 \end{figure}
 
-\subsection{Code Input}
+\subsection{Code Input(Game Controller)}
 \begin{wrapfigure}{r}{0.5\textwidth}
     \centering
     \includegraphics[width=0.5\linewidth]{images/textbox.png}
     \caption{Simple basic text box (\cite{azatbekuly2023enhancing})}
+    \label{fig:textbox}
 \end{wrapfigure}
-When continue building the project, a plain textbox was initially used to input code as show in Figure \ref{fig:textbox}. 
+The game controller is the main interface between the game and the player, it is a system that accepts the player's code. The game controller will be responsible for checking basic errors in player's code and updating the game state and the UI after interacting with it. 
+
+When building the project, the main options were a block based system as shown in Figure \ref{fig:minecraft_code_builder} or a text-based input system. Initially a plain textbox was initially used to input code as show in Figure \ref{fig:textbox}. 
 
 To improve on this submission of code, we can use a code editor like professional integrated development environments (IDEs) due to their many features(\cite{kapoor2024analysis}). The code editor, Monaco was decided upon compared to other editors such as Ace and CodeMirror. Monaco also needed special configurations in the bundle system, and was tough to get it to cooperate. Features that are included and being worked on are:
 \begin{itemize}
@@ -146,6 +166,7 @@ To improve on this submission of code, we can use a code editor like professiona
     \centering
     \includegraphics[width=0.3\linewidth]{images/code_editor.png}
     \caption{Code editor of IDE, a significant improvement over a basic textbox}
+    \label{fig:code_editor}
 \end{figure}
 The gamestate object can also control what appears on the code editor. Upon code submission, the next section will discuss the code execution system that will be used to run the code and check for errors.
 

@@ -1,59 +1,85 @@
-\section{Background on Code transpilation}
-Source-to-source compilers, also known as transcompiler, transpiler or cross-compilers is a set of tools that take the source code developed in a high-level programming language (source language), and after a transpilation process, it generates a translated source code written in another programming language (target language), that is syntactically and approximately equivalent, the original source code can now be compiled and ran in the target language. 
+\section{Setup of code execution}
+Python code submitted by the user should be executed to achieve some type of objective with constraints so that the objective can be achieved by the game/level designer's intended methods. Many unintended actions can be caused if user code is not run securely such as the modification of the intended objective, falsification of high scores, crashing the backend, or in the worst case, bypassing the game and changing system files and databases.
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.4\textwidth]{images/transpiler_working.png}
-    \caption{Principles of working for a transpiler}
-    \label{fig:transpiler_working}
-\end{figure}
+According to other online coding tools, most methods to setup code execution can be classified into 2 categories: client-side setup and server-side setup. In this section, we will discuss the pros and cons of each method and how they can be implemented to ensure the security of the system.
 
-\begin{lstlisting}[language=Python, caption=Example of python user code]
-# Python Program to find the area of triangle
+\subsection{Transpilation tools}
+Before code is executed, we have to discuss on how the code will be executed.  Since most browsers do not natively allow python code to be ran, we need to look into transpilation. An additional concern is if our backend servers are not able to execute python code due to it being in a different language. To overcome these concerns, we need to transpile our python user code to some other compatible language that can execute the user code in a different language and return the results back in Python. This subsection will cover the different transpiler tools available that would allow us to execute python code. 
 
-a = 5
-b = 6
-c = 7
+Most of the discussed transpilers consistently have issues with blocking synchronous user input. This introduces lots of bugs and causes crashing the user's browser, which was a huge problem during testing and implementation as it was also hard to debug.  Another issue was the usage of other python modules, Puder et al.[4], says that cross-compilation itself provides only the tools to translate from one language to another, but to make it usable, it is necessary to offer a library or manager to provide the building blocks and there currently exists no such libraries to transpile the entire python package and module ecosystem, only parts of it. 
 
-# calculate the semi-perimeter
-s = (a + b + c) / 2
+\subsubsection{JavaScript-based transcription tools}
+Javascript is a core technology of the web and is supported by all browsers. Like WebAssembly, it is also able to run client-side and is able to run user code and faces many of its challenges. Javascript is also a language that is used in backend frameworks like Express.js and next.js. There are a few Python to JavaScript transpiler tools available, such as Brython, skulpt, filbert and transcrypt.
 
-# calculate the area
-area = (s*(s-a)*(s-b)*(s-c)) ** 0.5
-print('The area of the triangle is %0.2f' %area)
+Brython is a Python 3 implementation for client-side web programming, its main focus is to replace Javascript as the scripting language for the Web. It is a python compiler and an interpreter written in Javascript, this means that it is able compile the Python standard library into Javascript on the context of a website browser. It allows DOM manipulation and so forth, mainly being used as a tool for web development similar to Pyscript.
 
-\end{lstlisting}
+Transcrypt is a Python to JavaScript transpiler that is mostly similar to Brython, it uses a different approach and precompiles Python to JavaScript. There is no eval and exec of Python code as it is part of its concept. Transcrypt code is compiled, optimized and minified in advance to warant fast page loads. In this respect its design goal is fundamentally different from tools that compile on the fly in the browser, not being suitable for our use case of live programming in the browser.
 
-\begin{lstlisting}[language=JavaScript, caption=Example of a transpiled code]
-// JavaScript Program to find the area of triangle
+Skulpt is a javascript implementation of python syntax by use of a foreign function API. It is very similar to Pyodide, the main difference is that it does so with Javascript. However, it lacks more python modules such as numpy. 
 
-let a = 5;
-let b = 6;
-let c = 7;
+Filbert is a javascript based Python parser that is largely abandoned with the last commit being 6 years ago. However, It has a very interesting approach to parsing python code to javascript and could be used for debugging user code or live programming debugging scenarios.
 
-// calculate the semi-perimeter
-let s = (a + b + c) / 2;
+The discussed transpilers are alright for teaching the fundamentals but lack the ability to run other modules and libraries that are not included in the standard library such as numpy, pandas and even in some cases the basic math module.
 
-// calculate the area
-let area = Math.sqrt(s * (s - a) * (s - b) * (s - c));
-console.log(`The area of the triangle is ${area.toFixed(2)}`);
-\end{lstlisting}
-
-We need to look into transpilation due to 2 major concerns, one being the fact that most browsers do not natively allow python code to be ran and secondly if our backend servers are not able to execute python code. In scenarios like that, we need to transpile our python user code to some other compatible language that can execute the user code in a different language and return the results back in Python.
-
-Puder et al.[4], says that cross-compilation itself provides only the tools to translate from one language to another, but to make it usable, it is necessary to offer a library to provide the building blocks and there currently exists no such libraries to transpile the entire python ecosystem, only parts of it. Most of these transpilers consistently have issues with blocking synchronous user input. This introduces lots of bugs and causes crashing the user's browser, which was a huge problem during testing and implementation as it was also hard to debug. This section discusses the different transpiler tools available that would allow us to execute code.
-
-\subsection{WebAssembly-based transcription tools}
+\subsubsection{WebAssembly-based transcription tools}
 WebAssembly is a low level, byte code instruction set that is run directly from most browsers, it targets the problem of safe, fast, portable low-level code on the Web (CITE). It allows execution of code at near-native speed, and is a portable target for compilers from any language. By using a Python-to-WebAssembly transpiler tool, we can run the code in the browser without the need for a server. After transpilation, user written Python can then be interpreted and compiled to byte code and executed directly.
 
 An option that was under consideration to use for the project was PyodideU, as it allows synchronous user input, allowing blockable Python in the browser to be ran. It has many good features such as a Line by line debugger with access to local variable scope, Synchronous I/O and Graphics. Sadly, it lacks documentation as of the time of writing.
 
 Another alternative was pyscript, as it was also a way to enable Python to run in the browser via webAssembly. Pyscript also allows python to be ran in the browser and is primarily used for web development.
 
-Pyodide, a port of CPython to WebAssembly, was used as it is easy to implement was able to be run client-side and has a large, active community. Pyodide's main focus is to allow users to run Python code directly and also includes many general-purpose Python libraries, such as NumPy, Pandas, and regex.
+Pyodide, a port of CPython to WebAssembly, was used as it is easy to implement was able to be run client-side and has a large, active community. Pyodide's main focus is to allow users to run Python code directly and also includes many general-purpose Python libraries, such as NumPy, Pandas, and regex. This is allowed due to the use of micropip, a lightweight Python package installer for Pyodide.
 
-\subsection{JavaScript-based transcription tools}
-Javascript is a core technology of the web and is supported by all browsers. Like WebAssembly, it is also able to run client-side and is able to run user code and faces many of its challenges. Javascript is also a language that is used in backend frameworks like Express.js and next.js.
+\subsection{Client-Side setup}
+By executing the code on client side with transpilation, the execution environment is ran client-side. This means that all potential damage is limited to the client only. If the code is malicious, their own page is broken and not the server.
 
-% rewrite this to illustrate each tool and not just glance over them
-There are a few Python to JavaScript transpiler tools available, such as Brython, skulpt, filbert and transcrypt. Brython compiles the Python standard library into JavaScript on the context of a website browser, whereas Transcrypt uses a different approach and precompiles Python to JavaScript. Skulpt is a javascript implementation of python syntax by use of a foreign function API. Filbert is a javascript based Python parser that is largely abandoned with the last commit being 6 years ago. It has a very interesting approach to parsing python code to javascript and could be used for debugging user code or live programming debugging scenarios. The discussed transpilers are alright for teaching the fundamentals but lack the ability to run other modules and libraries that are not included in the standard library such as numpy, pandas and even in some cases the basic math module.
+To ensure security, the Python execution environment also needs to be restricted so that it can't load or modify other local data files. Sensitive attributes must be hidden outside the Python execution environment where code is executed. This means that any execution output should be only able to communicate 1 way as shown in figure \ref{fig:execution layout}, and the execution process should be sandboxed and not be able to access anything beyond its scope, such as local files, backend and database. 
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/execution_layout.png}
+    \caption{Execution layout}
+    \label{fig:execution layout}
+\end{figure}
+
+Contrary, if the execution of the code itself can be sandboxed and restricted within the same Python execution environment as the game/level code, sensitive attributes can also be stored within the execution environment. However, previous attempts have deemed this impossible, as “there are too many ways to escape the untrusted namespace using the various introspection features of the Python language,” as shown by the failure of the pySandbox to restrict local (CITE THIS). Despite being risky to be in the same process as user code, checks are injected in the user python code to ensure goals are met. This is because checks are still needed to ensure that the code has been processed a certain defined way in some levels and ways to safeguard this will be discussed in the next section.
+
+
+\subsubsection{Overview}
+The client-side setup brings many benefits and disadvantages. If the client is disconnected from the server after loading the web app, the code can still be run locally on the machine as it has serverless program execution. Since the code is also run client-side, It can help reduce server load as no code is sent over and run locally on the client's machine. The client's machine is responsible for all code execution and therefore the execution speed is also reliant on it, getting rid of latency issues and making it more interactive. However, due to it running on the client's machine, there can also be resource constraints, slow execution, and crashing in the worst case. Any malicious intent will also just end up in the attacker breaking their own browser. Any high scores uploaded to the server can also be falsified due to the client-side execution and the server having no idea how the code was executed.
+
+\subsection{Server-side setup}
+A server-based setup is the more popular option for executing untrusted Python code and many such tools have been developed for it. This involves the code being sent from the client side to the backend which then can be executed, this usually involves the use of sandboxes. According to \cite{stephens2024sandbox}, Sandboxing is a technique for enforcing security policies on untrusted guest applications in a secure environment (i.e., “sandbox”) to eliminate risk to a host system. In this section, it's function is to securely execute untrusted application on host systems (CITE THIS). This execution happens usually in an isolated container or a seperate process with limited resources and various filters, such as system calls and network traffic etc.
+
+Similar to the client-side setup, any execution output should only be sent without any influence to the backend database. Any execution processes should only happen within the isolated sandbox.
+
+Server-based setups should also be designed in a way that can execute user code by having the backend to be a Python server, or in cases where the server is setup in a different language such as Go or javascript, transpilation can be used on the server side to execute code.
+
+\subsubsection{Docker containers and Virtual Machines}
+A Docker container is a lightweight, standalone, executable package of software that includes everything needed to run an application, not to be confused with Virtual machines (VMs). Similar to methods employed in some CTFs (Capture The Flag), and other online tools used to assess code(CITE THIS), Docker containers can also be used to sandbox and execute code isolatedly. The container can either be ran on a VM or on the same server as the backend.
+
+Virtual Machines are also used to sandbox and execute code, but they are slower to boot up and can be expensive to run. They also require more resources than docker containers and can be harder to manage. However, they can be more secure than docker containers if they are isolated from the main server. These VMs can either be hosted on the same OS the server is ran on or hosted on the cloud with popular services such as Microsoft Azure and AWS EC2 instances.
+
+The architecture of a server-side setup with docker containers would look like in figure \ref{fig:docker container setup}. It begins with the frontend sending code to the backend to run it through the container. The backend sends the code to the container along with any relevant information, such as the current level. This enables the container to run any pre defined logic and checks based on relevant information. The container then does validation and execution of the code. The container will be running a seperate server that can handle code execution and sends the standard output back to the backend, which then sends the results back to the client. 
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/server_execution_layout.png}
+    \caption{Docker container setup}
+    \label{fig:docker container setup}
+\end{figure}
+
+To fire up and setup the container, a DockerFile which contains instructions on how to build the Docker image is used, this usually instructs what type of dependencies to install, setting environment variables and copying files etc. The DockerFile is then built into a Docker image using the 'docker build' command. The image is then used to create a docker container using the 'docker run' command, which is a shortcute of "docker create" and "docker start". A tool that can be used to speed up service running process is docker-compose. However, using a “dockercompose.yml” file, a container (or more than one) can be run with a single command (docker-compose up), in the background (using “-d” option) and the image can be built each time before container starts again.
+
+To setup a virtual machine, a filesystem is needed, and a VM is needed to be spun up. Popular VM options include VirtualBox, VMWare, and Hyper-V. VMs can also run almost any operating software, the most common being some form of Linux distro such as Ubuntu. VM security is also treated very seriously and there have also been a lot more history and security research done about VMs compared to Docker containers, such as seccomp which was initially developed as a way to restrict system calls for Linux kernels. VMs also have the advantage of customization and OS configuration to install OS specific packages such as CodeJail to help aid the execution of untrusted code.
+
+To gurantee absolute isolation and safety, both VMs and Docker containers can be used to construct the sandbox execution environment by hosting the Docker container on a cloud hosted VM that is seperate from the main backend.
+
+
+\subsubsection{Overview}
+Similar to client-side setup, potential benefits and disadvantages depend on how the system is designed. If one were to use docker containers to contain code execution, there would be a significantly increased server load, as virtual machines need to be booted up and served for each connection, as compared to executing code in a separate process in the server. However, docker containers have the advantage of limiting potential damage to only the OS it is hosted on. This setup also allows the server to log, monitor, rollbacks, and cache results from user code.
+
+Another potential addon to the server-side setup is to by applying client-side code enforcement before the code is sent to the backend. In this approach, the client-side environment is used to enforce initial constraints and perform preliminary checks on the user-submitted code. This can include syntax validation, basic security checks, and ensuring that the code adheres to predefined rules. By doing this on the client side, we can quickly filter out obviously malicious or incorrect code before it reaches the server and reject it before it is sent, reducing the server load and improving responsiveness.
+
+Both methods have their own pros and cons, and the choice of which method to use depends on the use case and the resources available. The client-side setup is more suitable for offline functionality and reducing server load, while the server-side setup is more suitable for monitoring, logging, and security.
+% If the setup for code execution is good, no code should be able to access anything beyond its scope, such as local files, backend, and database. The execution output should only be able to communicate one way and execution can't load or modify other local data files beyond its scope. However, code execution is not the only thing that can be malicious. Post code execution can also change registers, memory, and other processes. This is why it is important to have a good setup for code execution and also to have a good setup for monitoring and logging.

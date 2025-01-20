@@ -1,7 +1,9 @@
-\section{Safeguarding against malicious code output}
-If the setup for code execution is good, no code should be able to access anything beyond its scope, such as local files, backend, and database. The execution output should only be able to communicate one way and execution can't load or modify other local data files beyond its scope. However, code execution is not the only thing that can be malicious. Post code execution can also change registers, memory, and other processes. This is why it is important to have a good setup for code execution and also to have a good setup for monitoring and logging.
+\section{Possible features}
+\subsection{A live programming environment}
+% we lint it, we parse it, we sandbox it, we rewrite it, we transpile it, we parse it again, we rewrite it more, we instrument it, we transform it into continuation-passing style so we can execute it piecemeal, we transpile it again, we send it over to a Web Worker, we jam it into our World simulation, we run it, and then we serialize the results, the control flow, the execution metrics, and any errors back to the main thread
 
+% bret viktor
 
-\section{Conclusion}
-Researching Python-based execution environments is a research directive that warrants more attention as the trend of educational games continues, such as Google’s Blockly \cite{google_blockly} and China’s Yuanfudao's Homework Help \cite{xiaoyuan_kousuan}.
-The future steps of continuing to research Python-based execution environments are to look at key considerations such as the performance of both methods, what makes them secure, and possible alternative implementation methods. I also need to elaborate and clear up the process workflow such as detection/validation, cleaning/sanitization, submission, and evaluation phase. Lastly, I would also need to iterate on the design for modularity and scalability. The goal is to ensure a safe and secure working environment for what is needed to run such a service.
+\subsection{File system access}
+Emscripten has a virtual file system that allows the user to read and write files. This can be used to store user code and data.
+
